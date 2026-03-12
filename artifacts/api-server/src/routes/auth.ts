@@ -24,14 +24,9 @@ router.post("/login", async (req: Request, res: Response) => {
 
   const { userId, password, role } = parsed.data;
 
-  if (password !== PASSWORD) {
-    res.status(401).json({ error: "Invalid credentials" });
-    return;
-  }
-
   if (role === "teacher") {
-    if (userId !== TEACHER_ID) {
-      res.status(401).json({ error: "Invalid teacher ID" });
+    if (userId !== TEACHER_ID || password !== PASSWORD) {
+      res.status(401).json({ error: "Invalid credentials" });
       return;
     }
     (req.session as any).role = "teacher";
