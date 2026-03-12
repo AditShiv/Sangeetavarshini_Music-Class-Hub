@@ -1,0 +1,15 @@
+packages:
+  "framer-motion": "For elegant page transitions and component animations"
+  "date-fns": "For formatting class schedules and announcement dates"
+  "react-hook-form": "For robust form handling in scheduling and student creation"
+  "@hookform/resolvers": "For Zod schema validation with react-hook-form"
+
+images:
+  - path: "artifacts/music-school/public/images/hero-bg.png"
+    description: "Elegant dark background with abstract golden waves, subtle musical notes barely visible, moody and warm professional lighting, highly polished"
+    aspect_ratio: "16:9"
+
+notes:
+  - Using generated Orval hooks from @workspace/api-client-react
+  - Creating wrapper hooks to handle React Query invalidations automatically on success
+  - Embedding Jitsi Meet via simple iframe for video calls
