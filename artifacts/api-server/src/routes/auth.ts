@@ -3,8 +3,8 @@ import { LoginBody } from "@workspace/api-zod";
 
 const router: IRouter = Router();
 
-const TEACHER_ID = "TEACHER-001";
-const PASSWORD = "password@123";
+const TEACHER_ID = "UshaVangara181011";
+const PASSWORD = "SaiAshrith@2011";
 
 declare module "express-session" {
   interface SessionData {
