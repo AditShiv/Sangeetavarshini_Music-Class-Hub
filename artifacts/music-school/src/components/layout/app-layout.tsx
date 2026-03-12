@@ -7,7 +7,8 @@ import {
   CalendarDays, 
   Bell, 
   LogOut,
-  Video
+  Video,
+  KeyRound
 } from "lucide-react";
 import { useAppAuth } from "@/hooks/use-app-auth";
 import { Button } from "@/components/ui/button";
@@ -33,6 +34,7 @@ export function AppLayout({ children }: AppLayoutProps) {
     { name: "Dashboard", href: basePath, icon: LayoutDashboard },
     { name: "My Classes", href: `${basePath}/classes`, icon: CalendarDays },
     { name: "Announcements", href: `${basePath}/announcements`, icon: Bell },
+    { name: "My Account", href: `${basePath}/account`, icon: KeyRound },
   ];
 
   return (

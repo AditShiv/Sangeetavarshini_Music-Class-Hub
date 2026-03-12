@@ -7,6 +7,7 @@ export const studentsTable = pgTable("students", {
   studentId: text("student_id").notNull().unique(),
   name: text("name").notNull(),
   instrument: text("instrument").notNull(),
+  password: text("password").notNull().default("password@123"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

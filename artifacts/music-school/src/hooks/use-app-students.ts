@@ -24,6 +24,21 @@ export function useAppStudents() {
     }
   });
 
+  const changeStudentPassword = async (studentId: number, newPassword: string) => {
+    const res = await fetch(`/api/students/${studentId}/password`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ newPassword }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: "Failed to update password" }));
+      throw new Error(err.error || "Failed to update password");
+    }
+    await queryClient.invalidateQueries({ queryKey });
+    return res.json();
+  };
+
   return {
     students,
     isLoading,
@@ -31,5 +46,6 @@ export function useAppStudents() {
     isCreating: createMutation.isPending,
     deleteStudent: deleteMutation.mutateAsync,
     isDeleting: deleteMutation.isPending,
+    changeStudentPassword,
   };
 }

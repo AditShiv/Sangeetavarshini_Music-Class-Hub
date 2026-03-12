@@ -60,6 +60,11 @@ router.post("/login", async (req: Request, res: Response) => {
     }
 
     const student = students[0];
+    if (student.password !== password) {
+      res.status(401).json({ error: "Invalid credentials" });
+      return;
+    }
+
     (req.session as any).role = "student";
     (req.session as any).userId = userId;
     (req.session as any).name = student.name;
