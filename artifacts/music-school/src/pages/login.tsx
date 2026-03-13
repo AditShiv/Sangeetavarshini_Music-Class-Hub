@@ -133,14 +133,15 @@ export default function Login() {
                   {isLoggingIn ? "Signing in..." : "Sign In"}
                   {!isLoggingIn && <ArrowRight className="w-5 h-5 ml-2" />}
                 </Button>
-                
+
+                {/* Demo Credentials-
                 <div className="text-center mt-6">
                   <p className="text-xs text-muted-foreground">
                     Demo Credentials:<br/>
                     Teacher: TEACHER-001 / password@123<br/>
                     Student: STU-001 / password@123
                   </p>
-                </div>
+                </div>*/}
               </form>
             </CardContent>
           </Card>
