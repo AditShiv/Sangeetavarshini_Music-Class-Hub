@@ -1,9 +1,11 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect } from "react";
 import { useParams, useLocation } from "wouter";
-import { ArrowLeft, Loader2, Maximize, Minimize } from "lucide-react";
+import { ArrowLeft, Video, Mic, Music2, ExternalLink, Clock, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { useAppClasses } from "@/hooks/use-app-classes";
 import { useAppAuth } from "@/hooks/use-app-auth";
+import { format } from "date-fns";
 
 export default function Call() {
   const params = useParams();
@@ -11,105 +13,131 @@ export default function Call() {
   const [, setLocation] = useLocation();
   const { classes, updateClass } = useAppClasses();
   const { user } = useAppAuth();
-  
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
-  
+
   const classInfo = classes.find(c => c.id === classId);
 
+  const roomName = classInfo
+    ? `MaestroAcademy-${classId}-${classInfo.title.replace(/\s+/g, "")}`
+    : `MaestroAcademy-${classId}`;
+
+  const jitsiUrl = `https://meet.jit.si/${roomName}#config.prejoinPageEnabled=false&config.disableDeepLinking=true&userInfo.displayName=${encodeURIComponent(user?.name || "")}&config.enableNoisyMicDetection=false&config.enableNoAudioDetection=false&config.audioQuality.stereo=true&config.disableAP=true`;
+
   useEffect(() => {
-    // If teacher joins, automatically mark as ongoing if it's currently scheduled
     if (user?.role === "teacher" && classInfo && classInfo.status === "scheduled") {
       updateClass({ classId, data: { status: "ongoing" } });
     }
-  }, [user, classInfo, classId, updateClass]);
+  }, [user, classInfo, classId]);
 
-  const toggleFullscreen = () => {
-    if (!document.fullscreenElement) {
-      containerRef.current?.requestFullscreen().catch(err => {
-        console.error(`Error attempting to enable fullscreen: ${err.message}`);
-      });
-    } else {
-      document.exitFullscreen();
+  const handleJoin = () => {
+    window.open(jitsiUrl, "_blank", "noopener,noreferrer");
+  };
+
+  const handleEndClass = async () => {
+    if (confirm("Mark this class as completed?")) {
+      await updateClass({ classId, data: { status: "completed" } });
+      setLocation("/teacher/classes");
     }
   };
 
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
-  }, []);
-
-  if (!classInfo) {
-    return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
-        <Loader2 className="w-8 h-8 animate-spin text-primary mb-4" />
-        <p className="text-muted-foreground">Loading virtual studio...</p>
-      </div>
-    );
-  }
-
-  const roomName = `MaestroAcademy-${classId}-${classInfo.title.replace(/\s+/g, '')}`;
-  
-  // Construct Jitsi URL with parameters optimized for music/teaching
-  const jitsiUrl = `https://meet.jit.si/${roomName}#config.prejoinPageEnabled=false&config.disableDeepLinking=true&userInfo.displayName=${encodeURIComponent(user?.name || '')}&config.p2p.enabled=false&config.enableNoAudioDetection=false&config.enableNoisyMicDetection=false`;
-
   return (
-    <div ref={containerRef} className="min-h-screen bg-black flex flex-col relative w-full h-screen">
-      {/* Custom Header overlays iframe */}
-      <div className={`absolute top-0 left-0 w-full h-16 bg-gradient-to-b from-black/80 to-transparent z-10 flex items-center justify-between px-6 transition-transform duration-300 ${isFullscreen ? '-translate-y-full hover:translate-y-0' : ''}`}>
-        <div className="flex items-center gap-4">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="text-white hover:bg-white/20 rounded-full"
+    <div className="min-h-screen bg-background flex flex-col">
+      {/* Header */}
+      <div className="border-b border-border/50 bg-card px-6 py-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={() => setLocation(`/${user?.role}/classes`)}
+            className="text-muted-foreground"
           >
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <div>
-            <h1 className="text-white font-semibold text-lg drop-shadow-md">{classInfo.title}</h1>
-            <p className="text-white/70 text-xs">{classInfo.topic}</p>
+            <h1 className="font-bold text-lg">{classInfo?.title ?? "Loading..."}</h1>
+            <p className="text-xs text-muted-foreground">{classInfo?.topic}</p>
           </div>
         </div>
-        
-        <div className="flex items-center gap-2">
-          {user?.role === "teacher" && (
-            <Button 
-              size="sm" 
-              variant="destructive" 
-              className="h-8 text-xs font-semibold px-4"
-              onClick={async () => {
-                if(confirm("End class for everyone?")) {
-                  await updateClass({ classId, data: { status: "completed" } });
-                  setLocation("/teacher/classes");
-                }
-              }}
-            >
-              End Class
-            </Button>
-          )}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-white hover:bg-white/20 rounded-full"
-            onClick={toggleFullscreen}
-          >
-            {isFullscreen ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}
+        {user?.role === "teacher" && classInfo && (
+          <Button variant="destructive" size="sm" onClick={handleEndClass}>
+            End Class
           </Button>
-        </div>
+        )}
       </div>
 
-      {/* Main Jitsi Iframe */}
-      <div className="flex-1 w-full h-full">
-        <iframe 
-          src={jitsiUrl}
-          allow="camera; microphone; fullscreen; display-capture; autoplay"
-          className="w-full h-full border-0 bg-zinc-900"
-          title="Virtual Studio"
-        />
+      {/* Content */}
+      <div className="flex-1 flex items-center justify-center p-6">
+        <div className="w-full max-w-lg space-y-6">
+
+          {/* Class Info Card */}
+          {classInfo && (
+            <Card className="bg-card border-border/50">
+              <CardContent className="p-6 space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center">
+                    <Music2 className="w-6 h-6 text-primary" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-lg">{classInfo.title}</p>
+                    <p className="text-sm text-primary">{classInfo.topic}</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Clock className="w-4 h-4" />
+                    <span>{format(new Date(classInfo.scheduledAt), "MMM d, h:mm a")}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <BookOpen className="w-4 h-4" />
+                    <span>{classInfo.durationMinutes} minutes</span>
+                  </div>
+                </div>
+                {classInfo.description && (
+                  <p className="text-sm text-muted-foreground border-t border-border/50 pt-3">
+                    {classInfo.description}
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Join Card */}
+          <Card className="bg-card border-primary/20 border-2">
+            <CardContent className="p-8 text-center space-y-6">
+              <div className="w-20 h-20 rounded-full bg-primary/10 border-2 border-primary/30 flex items-center justify-center mx-auto">
+                <Video className="w-10 h-10 text-primary" />
+              </div>
+
+              <div>
+                <h2 className="text-xl font-bold">Ready to join?</h2>
+                <p className="text-muted-foreground text-sm mt-2">
+                  The class room opens in a new tab. Make sure your microphone and camera are ready.
+                </p>
+              </div>
+
+              <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground">
+                <span className="flex items-center gap-1.5">
+                  <Mic className="w-3.5 h-3.5 text-primary" /> High-quality audio
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <Video className="w-3.5 h-3.5 text-primary" /> HD video
+                </span>
+              </div>
+
+              <Button
+                size="lg"
+                className="w-full text-base font-semibold shadow-lg shadow-primary/20 gap-2"
+                onClick={handleJoin}
+              >
+                <ExternalLink className="w-5 h-5" />
+                Join Class Room
+              </Button>
+
+              <p className="text-xs text-muted-foreground">
+                Room: <code className="text-primary">{roomName}</code>
+              </p>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );
