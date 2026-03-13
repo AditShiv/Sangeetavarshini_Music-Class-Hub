@@ -1,6 +1,6 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import { db, classesTable } from "@workspace/db";
-import { eq } from "drizzle-orm";
+import { eq, or, isNull } from "drizzle-orm";
 import { CreateClassBody, UpdateClassBody } from "@workspace/api-zod";
 
 const router: IRouter = Router();
@@ -23,8 +23,18 @@ function requireAuth(req: Request, res: Response, next: () => void) {
   next();
 }
 
-router.get("/", requireAuth, async (_req: Request, res: Response) => {
-  const classes = await db.select().from(classesTable).orderBy(classesTable.scheduledAt);
+router.get("/", requireAuth, async (req: Request, res: Response) => {
+  const session = req.session as any;
+  let classes;
+
+  if (session.role === "student" && session.studentId) {
+    classes = await db.select().from(classesTable)
+      .where(or(isNull(classesTable.studentId), eq(classesTable.studentId, session.studentId)))
+      .orderBy(classesTable.scheduledAt);
+  } else {
+    classes = await db.select().from(classesTable).orderBy(classesTable.scheduledAt);
+  }
+
   res.json(classes.map(c => ({
     ...c,
     scheduledAt: c.scheduledAt.toISOString(),
@@ -47,6 +57,8 @@ router.post("/", requireTeacher, async (req: Request, res: Response) => {
     durationMinutes: parsed.data.durationMinutes,
     topic: parsed.data.topic,
     status: "scheduled",
+    studentId: (parsed.data as any).studentId ?? null,
+    recurringType: (parsed.data as any).recurringType ?? "none",
   }).returning();
 
   const meetingLink = `https://meet.jit.si/MusicLesson-${cls.id}`;
@@ -80,6 +92,8 @@ router.put("/:classId", requireTeacher, async (req: Request, res: Response) => {
   if (parsed.data.durationMinutes !== undefined) updateData.durationMinutes = parsed.data.durationMinutes;
   if (parsed.data.topic !== undefined) updateData.topic = parsed.data.topic;
   if (parsed.data.status !== undefined) updateData.status = parsed.data.status;
+  if ((parsed.data as any).studentId !== undefined) updateData.studentId = (parsed.data as any).studentId;
+  if ((parsed.data as any).recurringType !== undefined) updateData.recurringType = (parsed.data as any).recurringType;
 
   const [updated] = await db.update(classesTable).set(updateData).where(eq(classesTable.id, id)).returning();
 
