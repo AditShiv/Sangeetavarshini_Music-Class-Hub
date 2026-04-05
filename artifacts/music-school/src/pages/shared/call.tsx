@@ -17,8 +17,8 @@ export default function Call() {
   const classInfo = classes.find(c => c.id === classId);
 
   const roomName = classInfo
-    ? `MaestroAcademy-${classId}-${classInfo.title.replace(/\s+/g, "")}`
-    : `MaestroAcademy-${classId}`;
+    ? `Sangeetavarshini-${classId}-${classInfo.title.replace(/\s+/g, "")}`
+    : `Sangeetavarshini-${classId}`;
 
   const jitsiUrl = `https://meet.jit.si/${roomName}#config.prejoinPageEnabled=false&config.disableDeepLinking=true&userInfo.displayName=${encodeURIComponent(user?.name || "")}&config.enableNoisyMicDetection=false&config.enableNoAudioDetection=false&config.audioQuality.stereo=true&config.disableAP=true`;
 

@@ -44,11 +44,11 @@ export function AppLayout({ children }: AppLayoutProps) {
         <div className="p-6 pb-2">
           <h1 className="text-2xl font-display font-bold text-primary flex items-center gap-2">
             <span className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center border border-primary/50">
-              <span className="text-primary text-sm">M</span>
+              <span className="text-primary text-sm">S</span>
             </span>
-            Maestro
+            Sangeetavarshini
           </h1>
-          <p className="text-xs text-muted-foreground mt-1 tracking-wide uppercase">Music Academy</p>
+          <p className="text-xs text-muted-foreground mt-1 tracking-wide uppercase">Music Learning Platform</p>
         </div>
 
         <nav className="flex-1 px-4 py-6 space-y-2">
