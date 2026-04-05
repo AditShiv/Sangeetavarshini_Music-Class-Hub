@@ -71,9 +71,12 @@ export default function Login() {
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 mb-6 shadow-lg shadow-primary/5">
               <Music className="w-8 h-8 text-primary" />
             </div>
-            <h1 className="text-4xl md:text-5xl font-display font-bold text-foreground mb-3">
-              Sangeetavarshini - Music Learning Platform
+            <h1 className="text-4xl md:text-5xl font-display font-bold text-foreground mb-1">
+              Sangeetavarshini
             </h1>
+            <p className="text-muted-foreground text-sm mb-3">
+              - Music Learning Platform
+            </p>
             <p className="text-muted-foreground text-lg">
               Elevate your musical journey
             </p>
