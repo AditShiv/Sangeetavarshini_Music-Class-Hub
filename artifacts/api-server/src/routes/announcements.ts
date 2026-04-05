@@ -23,6 +23,7 @@ function requireAuth(req: Request, res: Response, next: () => void) {
   next();
 }
 
+
 router.get("/", requireAuth, async (_req: Request, res: Response) => {
   const announcements = await db.select().from(announcementsTable).orderBy(desc(announcementsTable.isPinned), desc(announcementsTable.createdAt));
   res.json(announcements.map(a => ({
